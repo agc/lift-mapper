@@ -1,10 +1,11 @@
 package bootstrap.liftweb
 
 import net.liftweb._
-import net.liftweb.mapper.{DB,Schemifier,DefaultConnectionIdentifier,StandardDBVendor,MapperRules}
+import http._
+import net.liftweb.mapper.{DB,Schemifier,DefaultConnectionIdentifier,StandardDBVendor}
 
-import http.{S,LiftRules, NotFoundAsTemplate, ParsePath}
-import sitemap.{SiteMap, Menu, Loc}
+import sitemap.Loc.{Hidden,LocGroup }
+import sitemap.{SiteMap, Menu}
 import util.{ NamedPF,Props }
 
 import example.travel.model.{Auction,Supplier,Customer,Bid,Order,OrderAuction}
@@ -33,11 +34,16 @@ class Boot {
     // build sitemap
 
 
-    val sitemap = List(
-      Menu("Home") / "index" >> Loc.LocGroup("public"),
-      Menu("Admin") / "admin" / "index" >> Loc.LocGroup("admin"),
-      Menu("Suppliers") / "admin" / "suppliers" >> Loc.LocGroup("admin")
-        submenus(Supplier.menus : _*)
+
+
+
+    val sitemap=List(
+      Menu("Home") / "index" >> LocGroup("public"),
+      Menu("Auctions") / "auctions" >> LocGroup("public"),
+      Menu("Auction Detail") / "auction" >> LocGroup("public") >> Hidden,
+      Menu("Admin") / "admin" / "index" >> LocGroup("admin"),
+      Menu("Suppliers") / "admin" / "suppliers" >> LocGroup("admin") submenus(Supplier.menus : _*),
+      Menu("Auction Admin") / "admin" / "auctions" >> LocGroup("admin") submenus(Auction.menus : _*)
     ) ::: Customer.menus
     
     LiftRules.uriNotFound.prepend(NamedPF("404handler"){
@@ -46,6 +52,11 @@ class Boot {
     })
     
     LiftRules.setSiteMap(SiteMap(sitemap:_*))
+
+    LiftRules.statelessRewrite.append {
+      case RewriteRequest(ParsePath("auction" :: key :: Nil,"",true,_),_,_) =>
+        RewriteResponse("auction" :: Nil, Map("id" -> key))
+    }
     
     // set character encoding
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))

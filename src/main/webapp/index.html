@@ -1,6 +1,8 @@
 <lift:surround with="splash" at="content">
   <div id="box1" class="topbg">
     <h1>Today's top auctions</h1>
+
+    <!--
     <p><lift:hello_world.howdy /></p>
     
     <div style="clear: both;">
@@ -31,6 +33,19 @@
       </p>
     </div>
     <p style="clear:both;"><a href="/auctions">more auctions &gt; &gt;</a></p>
+  </div>
+
+  -->
+
+      <p><lift:helloWorld.howdy /></p>
+      <div style="clear: both;" class="auction_row" lift="listings.top">
+          <img src="images/homepage09.jpg" alt="" width="72" height="72" class="left" />
+          <p>
+              <strong class="name">NAME</strong> (<a href="#">learn more...</a>)
+              <br /><span class="desc">Description goes here</span>
+          </p>
+      </div>
+      <p style="clear:both;"><a href="/auctions">more auctions &gt; &gt;</a></p>
   </div>
   
   <lift:bind-at name="sidebar">

@@ -36,6 +36,8 @@ object Auction
     override def viewMenuLocParams = LocGroup("admin") :: Nil
     override def editMenuLocParams = LocGroup("admin") :: Nil
     override def deleteMenuLocParams = LocGroup("admin") :: Nil
+
+
   }
 
 class Auction extends LongKeyedMapper[Auction] with IdPK with CreatedUpdated {
@@ -63,4 +65,17 @@ class Auction extends LongKeyedMapper[Auction] with IdPK with CreatedUpdated {
   
   // helper: get all the bids for this auction
   def bids = Bid.findAll(By(Bid.auction, this.id), OrderBy(Bid.id, Descending))
+
+  def winningCustomer: Box[Customer] = topBid.flatMap(_.customer.obj)
+
+  private def topBid: Box[Bid] = bids match {
+    case List(first, _*) => Full(first)
+    case _ => Empty
+  }
+
+  def travelDates: String = (Box.!!(inboundOn.is), Box.!!(outboundOn.is)) match {
+    case (Full(in), Full(out)) => out.toString + ", returning " + in.toString
+    case (Empty,Full(out)) => out.toString + " (one way)"
+    case _ => "Travel dates not specified, call the vendor."
+  }
 }
